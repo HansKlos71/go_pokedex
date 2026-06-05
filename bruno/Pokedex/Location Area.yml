@@ -1,0 +1,17 @@
+info:
+  name: Location Area
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: https://pokeapi.co/api/v2/location-area/
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: https://pokeapi.co/docs/v2#location-areas
