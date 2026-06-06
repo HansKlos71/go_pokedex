@@ -16,3 +16,11 @@ func NewPokemon(name string, basedExperience *int) Pokemon {
 		Name: name,
 	}
 }
+
+func (p Pokemon) GetName() string {
+	return p.Name
+}
+
+func (p Pokemon) GetBasedExperience() int {
+	return p.BasedExperience
+}
