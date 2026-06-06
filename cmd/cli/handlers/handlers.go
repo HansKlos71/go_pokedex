@@ -54,6 +54,16 @@ func (h *CommandHandler) GetCommands() map[string]app.CLICommand {
 			Description: "A command to catch a pokemon.",
 			Callback:    h.Catch,
 		},
+		"inspect": {
+			Name:        "inspect",
+			Description: "A command to inspect a pokemon.",
+			Callback:    h.Inspect,
+		},
+		"pokedex": {
+			Name:        "pokedex",
+			Description: "List collected pokemons",
+			Callback:    h.Pokedex,
+		},
 	}
 }
 
@@ -124,15 +134,35 @@ func (h *CommandHandler) Explore(config *app.App, locationName string) error {
 func (h *CommandHandler) Catch(config *app.App, args string) error {
 	pokemonName := args
 	fmt.Printf("Throwing a Pokeball at %s...\n", pokemonName)
-	catched, err := h.PokemonService.Catch(pokemonName)
+	caught, err := h.PokemonService.Catch(pokemonName)
 	if err != nil {
 		fmt.Printf("error while catching pokemon: %w\n", err)
 		return fmt.Errorf("error while catching pokemon: %w\n", err)
 	}
-	if catched == false {
-		fmt.Sprintf("%s escaped!\n", pokemonName)
+	if caught == false {
+		fmt.Printf("%s escaped!\n", pokemonName)
 		return nil
 	}
-	fmt.Sprintf("%s was caught!\n", pokemonName)
+	fmt.Printf("%s was caught!\n", pokemonName)
+	return nil
+}
+
+func (h *CommandHandler) Inspect(config *app.App, args string) error {
+	poke, err := h.PokemonService.GetPokemonsDataFromPokedex(args)
+	if err != nil {
+		return fmt.Errorf("error while fetching pokemon data: %w", err)
+	}
+	fmt.Printf("Name: %s\n", poke.Name)
+	fmt.Printf("Base XP %s\n", poke.BasedExperience)
+	return nil
+
+}
+
+func (h *CommandHandler) Pokedex(config *app.App, args string) error {
+	pokemons := h.PokemonService.ListPokemonsFromPokedex()
+	fmt.Println("Your Pokedex:")
+	for _, poke := range pokemons {
+		fmt.Printf("- %s\n", poke.Name)
+	}
 	return nil
 }

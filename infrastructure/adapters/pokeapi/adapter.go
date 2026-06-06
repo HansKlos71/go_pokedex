@@ -116,7 +116,7 @@ func (c *PokeAPIClient) parsePokemonsFromLocationDetails(locationDetails Locatio
 }
 
 func (c *PokeAPIClient) GetPokemonDetails(pokemonName string) (pokemon2.Pokemon, error) {
-	url := fmt.Sprintf("%s/%s/", c.URLs[pokemon], pokemonName)
+	url := fmt.Sprintf("%s%s", c.URLs[pokemon], pokemonName)
 	data, ok := c.cache.Get(url)
 	if !ok {
 		var err error
