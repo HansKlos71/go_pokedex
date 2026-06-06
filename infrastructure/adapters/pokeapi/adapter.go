@@ -115,13 +115,25 @@ func (c *PokeAPIClient) parsePokemonsFromLocationDetails(locationDetails Locatio
 	return pokemonList
 }
 
-//func (c *PokeAPIClient) GetPokemonDetails(pokemonName string) error {
-//	data, ok := c.cache.Get(pokemonName)
-//	if !ok {
-//		// fetch data
-//	}
-//
-//	var parsedPokemonData
-//
-//	return nil
-//}
+func (c *PokeAPIClient) GetPokemonDetails(pokemonName string) (pokemon2.Pokemon, error) {
+	url := fmt.Sprintf("%s/%s/", c.URLs[pokemon], pokemonName)
+	data, ok := c.cache.Get(url)
+	if !ok {
+		var err error
+		data, err = c.CallPokeAPI(url)
+		if err != nil {
+			return pokemon2.Pokemon{}, fmt.Errorf("error while fetching location details: %w", err)
+		}
+		c.cache.Add(url, data)
+	}
+
+	var parsedPokemonData PokemonDetailsResponse
+
+	if err := json.Unmarshal(data, &parsedPokemonData); err != nil {
+		fmt.Println("error while parsing pokemon details")
+		fmt.Println(err)
+		return pokemon2.Pokemon{}, err
+	}
+
+	return pokemon2.NewPokemon(parsedPokemonData.Name, &parsedPokemonData.BaseExperience), nil
+}

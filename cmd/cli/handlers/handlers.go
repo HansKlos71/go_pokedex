@@ -122,8 +122,17 @@ func (h *CommandHandler) Explore(config *app.App, locationName string) error {
 }
 
 func (h *CommandHandler) Catch(config *app.App, args string) error {
-	//pokemonName := args
-	//fmt.Printf("Throwing a Pokeball at %s...", pokemonName)
-
-	return fmt.Errorf("Not implemented yet")
+	pokemonName := args
+	fmt.Printf("Throwing a Pokeball at %s...\n", pokemonName)
+	catched, err := h.PokemonService.Catch(pokemonName)
+	if err != nil {
+		fmt.Printf("error while catching pokemon: %w\n", err)
+		return fmt.Errorf("error while catching pokemon: %w\n", err)
+	}
+	if catched == false {
+		fmt.Sprintf("%s escaped!\n", pokemonName)
+		return nil
+	}
+	fmt.Sprintf("%s was caught!\n", pokemonName)
+	return nil
 }

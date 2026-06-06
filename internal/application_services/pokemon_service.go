@@ -1,19 +1,19 @@
 package application_services
 
 import (
-	"fmt"
-
 	"github.com/hansklos71/go_pokedex/internal/domain/pokemon"
 	"github.com/hansklos71/go_pokedex/internal/ports"
 )
 
 type PokemonService struct {
-	PokeAPIClient ports.PokemonLocationsPort
+	PokeAPIClient     ports.PokemonLocationsPort
+	PokedexRepository ports.PokedexRepository
 }
 
-func NewPokemonService(PokeAPIClient ports.PokemonLocationsPort) *PokemonService {
+func NewPokemonService(PokeAPIClient ports.PokemonLocationsPort, PokedexRepository ports.PokedexRepository) *PokemonService {
 	return &PokemonService{
-		PokeAPIClient: PokeAPIClient,
+		PokeAPIClient:     PokeAPIClient,
+		PokedexRepository: PokedexRepository,
 	}
 }
 
@@ -25,7 +25,20 @@ func (s *PokemonService) GetPokemonsForLocation(locationName string) ([]pokemon.
 	return pokemons, nil
 }
 
-func (s *PokemonService) Catch(pokemonName string) error {
+func (s *PokemonService) Catch(pokemonName string) (bool, error) {
+	var pokemonCatched bool
+	pokemon, err := s.PokeAPIClient.GetPokemonDetails(pokemonName)
+	if err != nil {
+		return false, err
+	}
 
-	return fmt.Errorf("Not implemented yet")
+	// falculate catch chance and set pokemonCatched
+	pokemonCatched = true
+
+	if pokemonCatched == false {
+		return false, nil
+	}
+
+	s.PokedexRepository.AddPokemon(pokemon.Name)
+	return true, nil
 }

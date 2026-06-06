@@ -8,4 +8,5 @@ import (
 type PokemonLocationsPort interface {
 	ListLocations(offset, limit int) ([]location.Location, error)
 	GetPokemonsForLocation(locationName string) ([]pokemon.Pokemon, error)
+	GetPokemonDetails(pokemonName string) (pokemon.Pokemon, error)
 }
