@@ -6,7 +6,8 @@ import (
 	"io"
 	"net/http"
 
-	application_services "github.com/hansklos71/go_pokedex/internal/application services"
+	"github.com/hansklos71/go_pokedex/internal/domain/location"
+	pokemon2 "github.com/hansklos71/go_pokedex/internal/domain/pokemon"
 )
 
 type PokeAPIClient struct {
@@ -41,7 +42,7 @@ func (c *PokeAPIClient) CallPokeAPI(url string) ([]byte, error) {
 	return data, nil
 }
 
-func (c *PokeAPIClient) GetLocations(offset, limit int) ([]Location, error) {
+func (c *PokeAPIClient) ListLocations(offset, limit int) ([]location.Location, error) {
 	url := fmt.Sprintf("%s?offset=%d&limit=%d", c.URLs[locationList], offset, limit)
 
 	data, ok := c.cache.Get(url)
@@ -62,10 +63,28 @@ func (c *PokeAPIClient) GetLocations(offset, limit int) ([]Location, error) {
 
 	var locations []Location
 	locations = parsedResponse.Results
-	return locations, nil
+
+	return c.parseLocations(locations), nil
 }
 
-func (c *PokeAPIClient) GetLocationDetails(locationName string) (LocationDetailsResponse, error) {
+func (c *PokeAPIClient) parseLocations(locations []Location) []location.Location {
+	var parsedLocations []location.Location
+	for _, loc := range locations {
+		parsedLocations = append(parsedLocations, location.Location{Name: loc.Name})
+	}
+	return parsedLocations
+}
+
+func (c *PokeAPIClient) GetPokemonsForLocation(locationName string) ([]pokemon2.Pokemon, error) {
+	locationDetails, err := c.getLocationDetails(locationName)
+	if err != nil {
+		return nil, fmt.Errorf("error while fetching location details: %w", err)
+	}
+	return c.parsePokemonsFromLocationDetails(locationDetails), nil
+
+}
+
+func (c *PokeAPIClient) getLocationDetails(locationName string) (LocationDetailsResponse, error) {
 	url := fmt.Sprintf("%s/%s/", c.URLs[locationList], locationName)
 
 	data, ok := c.cache.Get(url)
@@ -79,22 +98,21 @@ func (c *PokeAPIClient) GetLocationDetails(locationName string) (LocationDetails
 		c.cache.Add(url, data)
 	}
 
-	var parsedLocationDetailsResponse LocationDetailsResponse
+	var locationDetailsResponse LocationDetailsResponse
 
-	if err := json.Unmarshal(data, &parsedLocationDetailsResponse); err != nil {
+	if err := json.Unmarshal(data, &locationDetailsResponse); err != nil {
 		return LocationDetailsResponse{}, fmt.Errorf("error while parsing location details: %w", err)
 	}
 
-	return parsedLocationDetailsResponse, nil
+	return locationDetailsResponse, nil
 }
 
-func (c *PokeAPIClient) GetPokemonForLocation(locationName string) ([]application_services.Pokemon, error) {
-	locationDetails, err := c.GetLocationDetails(locationName)
-	if err != nil {
-		return nil, fmt.Errorf("error while fetching location details: %w", err)
+func (c *PokeAPIClient) parsePokemonsFromLocationDetails(locationDetails LocationDetailsResponse) []pokemon2.Pokemon {
+	var pokemonList []pokemon2.Pokemon
+	for _, encounter := range locationDetails.PokemonEncounters {
+		pokemonList = append(pokemonList, pokemon2.Pokemon{Name: encounter.Pokemon.Name})
 	}
-	return c.parsePokemonsFromLocationDetails(locationDetails), nil
-
+	return pokemonList
 }
 
 //func (c *PokeAPIClient) GetPokemonDetails(pokemonName string) error {
@@ -107,11 +125,3 @@ func (c *PokeAPIClient) GetPokemonForLocation(locationName string) ([]applicatio
 //
 //	return nil
 //}
-
-func (c *PokeAPIClient) parsePokemonsFromLocationDetails(locationDetails LocationDetailsResponse) []application_services.Pokemon {
-	var pokemonList []application_services.Pokemon
-	for _, encounter := range locationDetails.PokemonEncounters {
-		pokemonList = append(pokemonList, application_services.Pokemon{Name: encounter.Pokemon.Name})
-	}
-	return pokemonList
-}

@@ -1,8 +1,11 @@
 package ports
 
-import application_services "github.com/hansklos71/go_pokedex/internal/application services"
+import (
+	"github.com/hansklos71/go_pokedex/internal/domain/location"
+	"github.com/hansklos71/go_pokedex/internal/domain/pokemon"
+)
 
 type PokemonLocationsPort interface {
-	ListLocations(offset, limit int) ([]application_services.Location, error)
-	GetPokemonsForLocation(locationName string) (application_services.Pokemon, error)
+	ListLocations(offset, limit int) ([]location.Location, error)
+	GetPokemonsForLocation(locationName string) ([]pokemon.Pokemon, error)
 }

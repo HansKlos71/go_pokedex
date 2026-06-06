@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"bufio"
@@ -16,7 +16,7 @@ func cleanInput(text string) []string {
 	return strings.Fields(strings.ToLower(text))
 }
 
-func startRepl(config *AppConfig) {
+func StartRepl(config *App, dispatcher Dispatcher) {
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("Pokedex > ")
@@ -28,15 +28,14 @@ func startRepl(config *AppConfig) {
 		if len(cleanedInput) > 1 {
 			optionalArg = cleanedInput[1]
 		}
-		cmd, ok := getCommands()[command]
+		cmd, ok := dispatcher.GetCommands()[command]
 		if !ok {
 			fmt.Println("Unknown command")
 			continue
 		}
-		// fmt.Printf("Offset before cmd: %d\n", config.offset)
-		if err := cmd.callback(config, optionalArg); err != nil {
-			fmt.Errorf("error while executing command %s: %w\n", cmd.name, err)
+
+		if err := cmd.Callback(config, optionalArg); err != nil {
+			fmt.Errorf("error while executing command %s: %w\n", cmd.Name, err)
 		}
-		// fmt.Printf("Offset after cmd: %d\n", config.offset)
 	}
 }

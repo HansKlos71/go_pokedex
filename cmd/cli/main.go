@@ -1,18 +1,24 @@
 package main
 
 import (
+	config2 "github.com/hansklos71/go_pokedex/cmd/cli/app"
+	"github.com/hansklos71/go_pokedex/cmd/cli/handlers"
 	"github.com/hansklos71/go_pokedex/infrastructure/adapters/pokeapi"
+	"github.com/hansklos71/go_pokedex/internal/application_services"
 )
 
 func main() {
 
-	config := &AppConfig{
-		limit:         20,
-		offset:        -20,
-		URL:           "https://pokeapi.co/api/v2/location-area/",
-		PokeAPIClient: *pokeapi.NewPokeAPIClient(),
+	pokeAPIClient := pokeapi.NewPokeAPIClient()
+	locationService := application_services.NewLocationService(pokeAPIClient)
+	pokemonService := application_services.NewPokemonService(pokeAPIClient)
+	commandHandler := handlers.NewCommandHandler(*locationService, *pokemonService)
+
+	config := &config2.App{
+		Limit:  20,
+		Offset: 0,
 	}
 
-	startRepl(config)
+	config2.StartRepl(config, commandHandler)
 
 }
