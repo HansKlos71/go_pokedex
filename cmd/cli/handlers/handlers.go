@@ -116,7 +116,7 @@ func (h *CommandHandler) processResults(config *app.App) error {
 func (h *CommandHandler) Explore(config *app.App, locationName string) error {
 	fmt.Printf("Exploring %s ...\n", locationName)
 
-	pokemons, err := h.PokemonService.GetPokemonsForLocation(locationName)
+	pokemons, err := h.PokemonService.ListPokemonsForLocation(locationName)
 	if err != nil {
 		return fmt.Errorf("error while fetching locationDetails: %w", err)
 	}
@@ -148,9 +148,13 @@ func (h *CommandHandler) Catch(config *app.App, args string) error {
 }
 
 func (h *CommandHandler) Inspect(config *app.App, args string) error {
-	poke, err := h.PokemonService.GetPokemonsDataFromPokedex(args)
+	poke, err := h.PokemonService.GetPokemonDetailsFromPokedex(args)
 	if err != nil {
 		return fmt.Errorf("error while fetching pokemon data: %w", err)
+	}
+	if poke.Name == "" {
+		fmt.Printf("you have not caught that pokemon\n")
+		return nil
 	}
 	fmt.Printf("Name: %s\n", poke.Name)
 	fmt.Printf("Base XP %s\n", poke.BasedExperience)
